@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI API Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    textarea { width: 80%; height: 100px; margin-bottom: 10px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    .output { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Test OpenAI API</h1>
+  <textarea id="userInput" placeholder="Type your question..."></textarea><br>
+  <button onclick="sendToOpenAI()">Get Answer</button>
+
+  <div class="output" id="outputBox">Response will appear here...</div>
+
+  <script>
+    async function sendToOpenAI() {
+      const userInput = document.getElementById("userInput").value;
+      const outputBox = document.getElementById("outputBox");
+
+      if (!userInput.trim()) {
+        outputBox.textContent = "Please type something!";
+        return;
+      }
+
+      outputBox.textContent = "Thinking...";
+
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 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"
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini", // ✅ safer model, works for most accounts
+            messages: [{ role: "user", content: userInput }]
+          })
+        });
+
+        const data = await response.json();
+
+        console.log(data); // ✅ See full response in browser console
+
+        if (data.error) {
+          outputBox.textContent = "API Error: " + data.error.message;
+          return;
+        }
+
+        if (data.choices && data.choices.length > 0) {
+          outputBox.textContent = data.choices[0].message.content;
+        } else {
+          outputBox.textContent = "⚠ No response received. Check console (F12).";
+        }
+
+      } catch (error) {
+        outputBox.textContent = "Error: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
